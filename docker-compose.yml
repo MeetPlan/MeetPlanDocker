@@ -8,7 +8,7 @@ services:
     volumes:
       - ./default.conf:/etc/nginx/conf.d/default.conf
     networks:
-      smtp2:
+      meetplan:
         aliases:
           - nginx
     ports:
@@ -17,7 +17,7 @@ services:
   frontend:
     image: ghcr.io/meetplan/frontend
     networks:
-      smtp2:
+      meetplan:
         aliases:
           - frontend
   backend:
@@ -27,8 +27,8 @@ services:
     environment:
       - MP_HOST=0.0.0.0:80
     networks:
-      smtp2:
+      meetplan:
         aliases:
           - backend
 networks:
-  smtp2:
+  meetplan:
