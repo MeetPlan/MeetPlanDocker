@@ -30,5 +30,20 @@ services:
       meetplan:
         aliases:
           - backend
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot-etc:/etc/letsencrypt
+      - certbot-var:/var/lib/letsencrypt
+      - web-root:/var/www/html
+    depends_on:
+      - nginx-proxy
+    command: certonly --webroot --webroot-path=/var/www/html --email ${EMAIL} --agree-tos --no-eff-email --force-renewal -d ${DOMAIN_NAME}
 networks:
   meetplan:
+
+volumes:
+  certbot-etc:
+  certbot-var:
+  web-root:
