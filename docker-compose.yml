@@ -33,6 +33,8 @@ services:
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   frontend:
     image: ghcr.io/meetplan/frontend
+    depends_on:
+      - backend
     networks:
       meetplan:
         aliases:
@@ -41,6 +43,10 @@ services:
     image: ghcr.io/meetplan/backend
     volumes:
       - ./config.json:/app/config.json
+      - ./fonts:/app/fonts
+    restart: always
+    depends_on:
+      - postgres
     networks:
       meetplan:
         aliases:
