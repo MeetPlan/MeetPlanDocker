@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+  postgres:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      meetplan:
+        aliases:
+          - postgres
+    volumes: 
+      - ./MeetPlanDB:/var/lib/postgresql/data
   nginx-proxy:
     depends_on:
       - frontend
@@ -28,9 +40,7 @@ services:
   backend:
     image: ghcr.io/meetplan/backend
     volumes:
-      - ./MeetPlanDB:/app/MeetPlanDB
-    environment:
-      - MP_HOST=0.0.0.0:80
+      - ./config.json:/app/config.json
     networks:
       meetplan:
         aliases:
