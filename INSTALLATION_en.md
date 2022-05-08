@@ -33,6 +33,25 @@ Go back to "Code" section of your fork (of MeetPlanBackend)
 
 Now click `.` (dot). It should bring you to online instance of Visual Studio Code.
 
-Open the `icons` folder in the navigator (should be positioned on the left). Reupload all of the files with your own. Be sure that you replace all old files with new ones.
+Open the `icons` folder in the navigator (should be positioned on the left). Reupload all of the files with your own by dropping your files into `icons` folder in the Visual Studio Code window. Be sure that you replace all old files with new ones.
 Filenames MUST be same. MeetPlan logo ususally means school logo or a banner and should be replaced by your school's one.
 
+Once you have uploaded it, the files should be green.
+![image](https://user-images.githubusercontent.com/52399966/167306191-eff9ed28-e7d9-4770-9e6a-c5dae52eac4b.png)
+
+Click on the button that has number `2` on my picture. It's also called `Git button`.
+
+You should see this
+![image](https://user-images.githubusercontent.com/52399966/167306268-120023d5-58de-4964-9c68-ad35b8a9fa2e.png)
+
+Hover over changes tab. You'll see 2 buttons pop up - one is "Discard all changes" and the other one is "Stage all changes". Click on the "Stage all changes" button. You have now staged the files.
+![image](https://user-images.githubusercontent.com/52399966/167306379-f8861bfe-0e52-4c2a-97f8-9a4a5c010e6e.png)
+
+Type in a commit message, let's say `replace old logos with new ones` & click the checkmark button at the top (if you hover over it, it should say "Commit and Push").
+![image](https://user-images.githubusercontent.com/52399966/167306437-40123df4-9db7-466b-870b-9397396cf048.png)
+
+Congratulations. You have successfully commited & pushed your files to your fork.
+
+Now, go back to your repository. Open the "Actions" tab. You should see a running action. Wait for approx. 5 minutes. You should see a green checkmark.
+![image](https://user-images.githubusercontent.com/52399966/167306504-26877085-35e4-4f5a-9039-af9f27f20672.png)
+*GitHub Action is running - wait until green checkmark appears*
