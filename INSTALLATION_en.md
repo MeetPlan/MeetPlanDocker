@@ -8,7 +8,6 @@ So, you decided to install MeetPlan to your server. Here is the official documen
 Fork all of the following repositories (you have to be logged into GitHub to do that):
 - [MeetPlanBackend](https://github.com/MeetPlan/MeetPlanBackend) - not necessary if you don't want to change assets, though it's recommended to change the assets
 - [MeetPlanFrontend](https://github.com/MeetPlan/MeetPlanFrontend) - not necessary if you don't want to change assets
-- [MeetPlanDocker](https://github.com/MeetPlan/MeetPlanDocker) - not necessary if you want to modify the configuration on server
 
 GitHub Packages & GitHub Actions tokens are so well made, they [don't allow forked repos to have write access](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token). Instead, we have to use painstainking way of using Git, but don't worry, all commands are going to be explained.
 
@@ -86,5 +85,78 @@ Now, go back to your repository. Open the "Actions" tab. You should see a runnin
 ![image](https://user-images.githubusercontent.com/52399966/167306504-26877085-35e4-4f5a-9039-af9f27f20672.png)
 *This is an old image, where I really forked it, but the principle stays the same. GitHub Action is running - wait until green checkmark appears*
 
-### 3. Modify the Docker configuration for your own repository (if you forked the repository)
+### 3. Virtual Machine (VM) setup
+So, here we are, at the most important part - hosting the service. The setup is a little bit tricky, especially for Docker, but don't worry, we'll get all through it.
 
+#### 3.1. Select your VPS (Virtual Private Server aka. Virtual Machine aka. Server) provider
+This step is crucial. As I have experience on how this works within Slovenia, I'll describe the process within Slovenia.
+
+Schools in Slovenia generally have four options:
+- Choose a Slovenian VPS hosted for free by [Arnes](https://www.arnes.si). Each school that's rolled into Arnes's network gets sufficient system resources for running MeetPlan. This service is called [Arnes SPM](https://spm.arnes.si/) (Strežnik po meri). I have never tried this, as I don't have sufficient permissions in the [Arnes network](https://aai.arnes.si), so support for this is limited, but it should not differ too much from other solutions. Arnes offers you really nice support if you get stuck anywhere. This solution is definetely most recommended.
+- Choose a VPS hosted for free by [GRNET](https://grnet.gr/). Each school that's rolled into Arnes's network gets sufficient system resources for running MeetPlan. This service is called [~okeanos global Cyclades](https://cyclades.okeanos-global.grnet.gr/ui/). I have sufficient permissions in the [Arnes network](https://aai.arnes.si), so this method is fully supported. But beware, all servers expire after 6 months, which is really impractical if you want it to be reliable. THERE IS NO WAY OF RECOVERING ANYTHING AFTER THE SERVER HAS EXPIRED. YOU CAN CONTANCT THE SUPPORT, BUT THEY WILL GIVE YOU A VERY LIMITED TIME PERIOD OF ACCESSING THE SERVER. Arnes SPM servers on the other hand, I think they don't expire. Okeanos servers are running very outdated Linux images and internet connection to Greece (where these servers are hosted) is very poor and slow. Not recommended for serious use, but for testing, definetely recommended. I will be using them in my tutorial, as this is the only one, I have access to.
+- Self-host it within the school on school's own servers. This generally requires a lot of administration and is recommended only for schools with bigger needs of controlling their servers and possibly limiting the access to their internal network.
+- Choose a public VPS provider, like [Microsoft Azure](https://azure.microsoft.com/en-us/), [Google Cloud Platform](https://cloud.google.com/), [Amazon Web Services](https://aws.amazon.com/), [DigitalOcean](https://www.digitalocean.com/)... DigitalOcean is recommended for small schools, primary schools and some middle schools, which don't have as much students. It's the cheapest. If you need a little bit more control, I'd go with other services. This is not recommended and should be your last resort as it's FULLY PAID MONTHY OR ANNUALY, while for other services you don't need to pay anything.
+
+Once you have selected your VPS provider, head over to step 3.2.
+
+#### 3.2. Create a new virtual machine
+Now, the important part. Creating the actual server/virtual machine. This is really important, so follow it carefully.
+
+##### 3.2.1. Generate a new keypair
+WARNING: Though it's not recommended to use passwords for server auth, I do recommend them if you pick a really long one, randomly generated, that nobody should be able to guess. It's always better to generate a keypair and use Public-Private key authentication instead of password authentication, but if the service doesn't offer you this option, you can generate a really long password (like 30+ random characters). If you want, you can skip this part. If you don't know if your service supports keypairs, contact support and they will tell you how to enable it on your VM. 
+
+Once you are logged in, you should head over to the key tab. This is really important, so make sure to not mess it up. It should look something like this:
+
+![image](https://user-images.githubusercontent.com/52399966/167488609-3778c69c-42be-41ee-b89d-7ac7fd767e1e.png)
+
+Click "New Keypair". It should look something like this:
+
+![image](https://user-images.githubusercontent.com/52399966/167488698-2bb5c949-8455-4c03-86dc-e178fd2faee5.png)
+
+In ~okeanos global, you can simply generate a new keypair. Just click the "generate new" button in top right corner. You should see something like this:
+
+![image](https://user-images.githubusercontent.com/52399966/167489439-2431513c-bb3a-4683-9629-2bb87f640f9a.png)
+
+DOWNLOAD THE PRIVATE KEY. DON'T FORGET TO DOWNLOAD IT. IT'LL HAVE HUGE CONSEQUENCES LATER. BACKUP THE KEY. BACK IT UP IN THE CLOUD AND ON DIFFERENT HARDWARE (USB keys...)
+
+The downloaded file MUST BE in ".pem" format (with or without an file extension). Once you have successfully backed up the key, click close and head over to virtual machines tab. Click on "New Machine". A new popup should appear.
+
+##### 3.2.2. Create a VM configuation
+You should see the following:
+
+![image](https://user-images.githubusercontent.com/52399966/167490100-44885958-309f-4989-96b5-05d2f34d6f20.png)
+
+Always stick to system images, as these are stable and tested on this hardware. If you are using ~okeanos global, I recommend Ubuntu 16.04 LTS Linux, as it's the simplest to install Docker, but on any other VPS provider, I'd rather recommend Debian Linux, as it's more lightweight. Ubuntu directly inherits packages from Debian, so the commands should work for both operating systems.
+
+I'll select Ubuntu 16.04 LTS. Note that this is really outdated and unsupported image. Update the image as soon as possible. Once you have selected the desired operating system, click "Next".
+
+Minimum hardware requirements for MeetPlan are:
+- Linux-based operating system
+- 1 (v)CPU core
+- 0.5 GB RAM
+- Around 8GB for whole OS installation
+
+I however, recommend "2 vCPUs" and "2GB of RAM". You should pick "40GB of disk space". You MUST select an IP address. If you are not sure if IP address is already used by another machine, just create a new one. Click "next". Name the server as you wish. You must also select the public SSH key, generated before.
+
+![image](https://user-images.githubusercontent.com/52399966/167491384-def45e4e-0ca9-49c3-9bca-00544f5d91bb.png)
+
+Following is my final configuration:
+
+![image](https://user-images.githubusercontent.com/52399966/167491468-95c9a6ab-3005-4ba2-864b-1f539827852b.png)
+
+Once you are satisfied with your config, click "create machine". It should prompt you to save the password. Save it somewhere, but you probably won't need it. Wait for the machine to build and afterwards, you should be able to connect to the virtual machine by SSH software.
+
+Do you remember the key we downloaded from part 3.2.1.? This tutorial is written on Linux, so now you'll have to do the following. Open the terminal within the folder in which the downloaded key is. Do `chmod 400 <your key filename>`. Afterwards, you should be able to connect to the server using `SSH`. Do `ssh -i <your key filename> user@<ip address to the server>`. You should accept everything, and afterwards, when you see the following on your screen (or something similar), you know you are in the server.
+```sh
+Welcome to Ubuntu 16.04.3 LTS (GNU/Linux 4.4.0-109-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+254 packages can be updated.
+180 updates are security updates.
+
+
+user@snf-58132:~$
+```
