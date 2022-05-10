@@ -258,21 +258,91 @@ https://github.com/MeetPlan/MeetPlanDocker/blob/5fae73fa6357f4cd6fa17bcd402fff2a
 
 Change `<yourusername>` to your Linux system username (if you are using Okeanos, it's either `user` (for Ubuntu) or `debian` (for Debian)).
 
-Head a little bit up in the file until you react something like this:
+Head a little bit up in the file until you find something like this:
 https://github.com/MeetPlan/MeetPlanDocker/blob/cf005a3599dc53808635958373df5e6003766eaf/docker-compose.yml#L42-L45
 
 You have to change the `ghcr.io/meetplan/backend` to `ghcr.io/<your github fork username>/backend`, in my case it's `ghcr.io/mytja/backend`.
 
 That's it. Write out the file as described a few lines above and you are good to go.
 
-Now, all you have to do is to execute the following. These commands will install Let's Encrypt SSL certificates (which are fully free of charge) and all the necessary dependencies for it.
+Now, all you have to do is to execute the following. These commands will install Let's Encrypt SSL certificates (which are fully free of charge, but you can donate anytime - [Let's Encrypt donation link](https://letsencrypt.org/donate), [EFF donation link](https://eff.org/donate-le)) and all the necessary dependencies for it.
 ```sh
+chmod +x getdhparam.sh
+chmod +x initcert.sh
 ./getdhparam.sh
 ./initcert.sh
+sudo docker-compose down
 ```
 
-##### 3.2.6. Running the Docker containers.
-Running is as simple as one command.
+##### 3.2.6. Change nginx configuration.
+Open the file `default.conf` using `nano` - `nano default.conf`.
+
+Replace ALL the mentions of `example.com` with your domain name, for example `meetplan.meetplan.ml`.
+
+There should be 4 lines that contain this domain name, two `server_name` lines, one `ssl_certificate` line and one `ssl_certificate_key` line.
+
+Final config should be something like this:
+```
+server {
+    listen 80;
+    listen [::]:80;
+    server_name meetplan.meetplan.ml;
+
+    location ~ /.well-known/acme-challenge {
+        allow all;
+        root /var/www/html;
+    }
+
+    location / {
+        rewrite ^ https://$host$request_uri? permanent;
+    }
+}
+
+server {
+   listen 443 ssl http2;
+   listen [::]:443 ssl http2;
+   server_name meetplan.meetplan.ml;
+
+   server_tokens off;
+
+   ssl_certificate /etc/letsencrypt/live/meetplan.meetplan.ml/fullchain.pem;
+   ssl_certificate_key /etc/letsencrypt/live/meetplan.meetplan.ml/privkey.pem;
+
+   ssl_buffer_size 8k;
+
+   ssl_dhparam /etc/ssl/certs/dhparam-2048.pem;
+
+   ssl_protocols TLSv1.2 TLSv1.1 TLSv1;
+   ssl_prefer_server_ciphers on;
+
+   ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DH+3DES:!ADH:!AECDH:!MD5;
+
+   ssl_ecdh_curve secp384r1;
+   ssl_session_tickets off;
+
+   ssl_stapling on;
+   ssl_stapling_verify on;
+   resolver 8.8.8.8;
+
+   client_max_body_size 250M;
+
+   location / {
+      proxy_pass http://frontend:3000;
+   }
+
+   location /api/ {
+      proxy_pass http://backend/;
+   }
+
+   root /var/www/html;
+   index index.html index.htm index.nginx-debian.html;
+}
+```
+
+Once you are done, write out file using CTRL+O -> Enter -> CTRL+X keystrokes.
+
+##### 3.2.7. Running the Docker containers.
+Running is as simple as one command. If there are any errors, just exit the command (using CTRL+C) and rerun it. If that doesn't help, try to shutdown Docker containers using `sudo docker-compose down`
 ```sh
 sudo docker-compose up
 ```
