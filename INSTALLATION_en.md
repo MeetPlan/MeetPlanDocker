@@ -136,7 +136,7 @@ Minimum hardware requirements for MeetPlan are:
 - 0.5 GB RAM
 - Around 8GB for whole OS installation
 
-I however, recommend "2 vCPUs" and "2GB of RAM". You should pick "40GB of disk space". You MUST select an IP address. If you are not sure if IP address is already used by another machine, just create a new one. Click "next". Name the server as you wish. You must also select the public SSH key, generated before.
+I however, recommend "2 vCPUs" and "2GB of RAM". You should pick "40GB of disk space". You MUST select an IP address. If you are not sure if IP address is already used by another machine, just create a new one. Click "next". Name the server as you wish. You must also select the public SSH key, generated beforehand.
 
 ![image](https://user-images.githubusercontent.com/52399966/167491384-def45e4e-0ca9-49c3-9bca-00544f5d91bb.png)
 
@@ -144,7 +144,7 @@ Following is my final configuration:
 
 ![image](https://user-images.githubusercontent.com/52399966/167491468-95c9a6ab-3005-4ba2-864b-1f539827852b.png)
 
-Once you are satisfied with your config, click "create machine". It should prompt you to save the password. Save it somewhere, but you probably won't need it. Wait for the machine to build and afterwards, you should be able to connect to the virtual machine by SSH software.
+Once you are satisfied with your config, click "create machine". It should prompt you to save the password. Save it somewhere, you will need it. Wait for the machine to build and afterwards, you should be able to connect to the virtual machine by SSH software.
 
 Do you remember the key we downloaded from part 3.2.1.? This tutorial is written on Linux, so now you'll have to do the following. Open the terminal within the folder in which the downloaded key is. Do `chmod 400 <your key filename>`. Afterwards, you should be able to connect to the server using `SSH`. Do `ssh -i <your key filename> user@<ip address to the server>`. You should accept everything, and afterwards, when you see the following on your screen (or something similar), you know you are in the server.
 ```sh
@@ -160,3 +160,30 @@ Welcome to Ubuntu 16.04.3 LTS (GNU/Linux 4.4.0-109-generic x86_64)
 
 user@snf-58132:~$
 ```
+
+<!---
+Now, remember that password, I asked you to save earlier. Now do the following command `sudo usermod -aG sudo user`. It will ask you for this password. You should enter it and that's it.
+
+Now, open the SSH config file by using `sudo nano /etc/ssh/sshd_config`. Nano is just a simple text editor and I'm sure you'll figure out how you move within it 😉.
+
+Head over and replace these lines (they might not be all at the same spot - grouped together):
+```
+#PasswordAuthentication yes
+UsePAM yes
+
+PermitRootLogin prohibit-password
+```
+to this:
+```
+PasswordAuthentication no
+UsePAM no
+PermitRootLogin no
+PermitRootLogin prohibit-password
+```
+
+Write it out using CTRL+O and enter button, followed by CTRL+X.
+
+Reload the SSH daemon using this command: `sudo systemctl reload ssh`
+
+-->
+
