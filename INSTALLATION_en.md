@@ -187,3 +187,102 @@ Reload the SSH daemon using this command: `sudo systemctl reload ssh`
 
 -->
 
+##### 3.2.3. Subdomain setup
+Let's say you already own a domain. If not, you can get one for free at [dot.tk](https://dot.tk). Open up the configuration for your domain. Go to "DNS management" or something similar. It should look something like this on dot.tk:
+
+![image](https://user-images.githubusercontent.com/52399966/167690989-751cb5f1-568a-4079-8d92-51b0bb3206c1.png)
+
+Head over to "Add records" section. In the name text box, you enter the subdomain name, for example "meetplan". Set "Type" to A and "TTL" to 3600. "Target" should be your server's IP address. My configuration is following:
+
+![image](https://user-images.githubusercontent.com/52399966/167691584-540a5637-de88-4f31-aa11-f268650457a6.png)
+
+Click on "Save changes" and boom, you are done with domain setup. Pretty easy, right?
+
+##### 3.2.4. Docker & docker-compose setup
+Let's head back to the server. You should still be connected to it using SSH, otherwise simply connect to it as described above.
+
+Firstly, let's update the `apt` repositories. Do the following: `sudo apt update`. It will prompt you for a password.
+
+Now, install `haveged`. This makes sure that your system entropy is always high, which is mandatory for Docker. Install it using following command: `sudo apt install haveged`.
+
+Execute following commands, which install Docker and docker-compose.
+
+Ubuntu:
+```sh
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+sudo apt-get install -y docker-ce
+
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.5.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+echo "Docker version is $(docker --version)"
+echo "docker-compose version is $(docker-compose --version)"
+```
+
+Debian:
+```sh
+sudo apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+sudo apt update
+sudo apt install -y docker-ce
+
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.5.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+echo "Docker version is $(docker --version)"
+echo "docker-compose version is $(docker-compose --version)"
+```
+
+It might take a while, so be patient. If you get an output of both versions, you can be sure the Docker has been installed to your system and you can continue to the next chapter.
+
+##### 3.2.5. MeetPlanDocker
+Great, this step should be the shortest of them all.
+
+Execute the following command: `git clone https://github.com/MeetPlan/MeetPlanDocker`
+
+Head into the freshly cloned repository by using this command: `cd MeetPlanDocker`
+
+We'll have to modify the Docker files. First, we'll open the `initcert.sh` file with `nano`. Use the following command: `nano initcert.sh`.
+
+Head over to line 3. Change the email (`test@example.org`) to your personal/work/school email and the domain (`example.org`) to your subdomain, which is in my case `meetplan.meetplan.ml`. Be sure you configure this correctly otherwise the SSL certificate generation won't work correctly.
+
+Write the file out with the following sequence: CTRL+O -> Enter -> CTRL+X
+
+Now, let's open up the `docker-compose.yml` file. Use nano to open it: `nano docker-compose.yml`.
+
+Go to the end of the file, where you should see following:
+https://github.com/MeetPlan/MeetPlanDocker/blob/5fae73fa6357f4cd6fa17bcd402fff2a13c30e54/docker-compose.yml#L70-L75
+
+Change `<yourusername>` to your Linux system username (if you are using Okeanos, it's either `user` (for Ubuntu) or `debian` (for Debian)).
+
+Head a little bit up in the file until you react something like this:
+https://github.com/MeetPlan/MeetPlanDocker/blob/cf005a3599dc53808635958373df5e6003766eaf/docker-compose.yml#L42-L45
+
+You have to change the `ghcr.io/meetplan/backend` to `ghcr.io/<your github fork username>/backend`, in my case it's `ghcr.io/mytja/backend`.
+
+That's it. Write out the file as described a few lines above and you are good to go.
+
+Now, all you have to do is to execute the following. These commands will install Let's Encrypt SSL certificates (which are fully free of charge) and all the necessary dependencies for it.
+```sh
+./getdhparam.sh
+./initcert.sh
+```
+
+##### 3.2.6. Running the Docker containers.
+Running is as simple as one command.
+```sh
+sudo docker-compose up
+```
+
+First run should be with above command (test run command). Once everything is working, press CTRL+C and wait for Docker to shut down all the containers. After that, you can truly deploy everything. Everything will be running in background using this command:
+```sh
+sudo docker-compose up -d
+```
+
+Now, you can view the logs using `sudo docker-compose logs`, view running containers using `sudo docker-compose ps` and shut down the containers using `sudo docker-compose down`.
+
+
+Thank you for selecting MeetPlan and wish you a very good experience with it. If you have any problems, please contact me in the [GitHub repo](https://github.com/MeetPlan/MeetPlanDocker) in the "Issues" section. I will be happy to assist.
