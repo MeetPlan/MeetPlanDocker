@@ -44,6 +44,9 @@ services:
     volumes:
       - ./config.json:/app/config.json
       - ./cacerts:/app/cacerts
+      - ./protonConfig.json:/app/protonConfig.json
+      - ./icons:/app/icons
+      - ./documents:/app/documents
     restart: always
     depends_on:
       - postgres
