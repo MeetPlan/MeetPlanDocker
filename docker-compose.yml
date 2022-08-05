@@ -43,6 +43,7 @@ services:
     image: ghcr.io/meetplan/backend
     volumes:
       - ./config.json:/app/config.json
+      - ./cacerts:/app/cacerts
     restart: always
     depends_on:
       - postgres
