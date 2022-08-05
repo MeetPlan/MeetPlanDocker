@@ -1,3 +1,5 @@
+# OUTDATED! New documentation can be found [here](https://meetplan.si)
+
 # MeetPlan installation on a Linux virtual machine
 WARNING: MeetPlan is designed for only one school. You cannot manage multiple schools on same Docker container, however, you can deploy multiple Docker instances on the same server & modify the NGINX configuration.
 
