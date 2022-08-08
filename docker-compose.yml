@@ -10,6 +10,11 @@ services:
       meetplan:
         aliases:
           - postgres
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "10"
     volumes: 
       - ./MeetPlanDB:/var/lib/postgresql/data
   nginx-proxy:
@@ -27,6 +32,11 @@ services:
       meetplan:
         aliases:
           - nginx
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "10"
     ports:
       - "80:80"
       - "443:443"
@@ -39,6 +49,11 @@ services:
       meetplan:
         aliases:
           - frontend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "10"
   backend:
     image: ghcr.io/meetplan/backend
     volumes:
@@ -54,6 +69,11 @@ services:
       meetplan:
         aliases:
           - backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "10"
   certbot:
     image: certbot/certbot
     container_name: certbot
@@ -64,6 +84,39 @@ services:
     depends_on:
       - nginx-proxy
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    container_name: fail2ban
+    restart: "unless-stopped"
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - "./fail2ban-data:/data"
+      - "/var/log:/var/log:ro"
+      - "/var/lib/docker/containers/:/container-logs/:ro"
+    env_file:
+      - "./fail2ban.env"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "10"
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 60 --cleanup
+    profiles:
+      - debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "10"
 networks:
   meetplan:
 
