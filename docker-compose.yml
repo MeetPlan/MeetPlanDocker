@@ -110,6 +110,12 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command: --interval 60 --cleanup
+    depends_on:
+      - nginx-proxy
+      - backend
+      - frontend
+      - fail2ban
+      - postgres
     profiles:
       - debug
     logging:
