@@ -125,10 +125,10 @@ read
 
 sudo docker-compose up
 
-echo "${YELLOW}Zdaj bomo zagnali sistem v ozadju. Potrdite, da vse deluje s tipko ${BLUE}ENTER${NC}"
+echo -e "${YELLOW}Zdaj bomo zagnali sistem v ozadju. Potrdite, da vse deluje s tipko ${BLUE}ENTER${NC}"
 read
 
 chmod +x prodrestart.sh
 ./prodrestart.sh
 
-echo "${GREEN}MeetPlan sistem bi se v kratkem moral zagnati do konca. Želimo vam prijetno uporabo tega sistema, v primeru težav pa lahko kadarkoli kontaktirate MeetPlan ekipo na ${BLUE}info@meetplan.si${NC}"
+echo -e "${GREEN}MeetPlan sistem bi se v kratkem moral zagnati do konca. Želimo vam prijetno uporabo tega sistema, v primeru težav pa lahko kadarkoli kontaktirate MeetPlan ekipo na ${BLUE}info@meetplan.si${NC}"
